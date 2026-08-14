@@ -96,6 +96,25 @@ function cloneRules(rules: TimeRules): TimeRules {
   return ensureConstraints(structuredClone(rules));
 }
 
+function calendarKey(c: AcademicCalendar): string {
+  return `${c.academicYear.trim()}|${c.semester.trim()}`.toLowerCase();
+}
+
+/** Ensure seed calendars exist in storage (add missing only; keep user edits). */
+export function mergeCalendarSeed(
+  stored: AcademicCalendar[],
+): AcademicCalendar[] {
+  const byId = new Set(stored.map((c) => c.id));
+  const byKey = new Set(stored.map(calendarKey));
+  const extras: AcademicCalendar[] = [];
+  for (const seed of calendarsSeed) {
+    if (byId.has(seed.id) || byKey.has(calendarKey(seed))) continue;
+    extras.push(structuredClone(seed));
+  }
+  if (extras.length === 0) return stored;
+  return [...stored, ...extras];
+}
+
 export function loadCalendars(): AcademicCalendar[] {
   try {
     const raw = localStorage.getItem(CAL_KEY);
@@ -108,7 +127,11 @@ export function loadCalendars(): AcademicCalendar[] {
       saveCalendars(calendarsSeed);
       return structuredClone(calendarsSeed);
     }
-    return parsed;
+    const merged = mergeCalendarSeed(parsed);
+    if (merged.length !== parsed.length) {
+      saveCalendars(merged);
+    }
+    return merged;
   } catch {
     saveCalendars(calendarsSeed);
     return structuredClone(calendarsSeed);

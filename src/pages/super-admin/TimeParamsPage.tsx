@@ -374,7 +374,7 @@ export function TimeParamsPage() {
                         <label htmlFor="year">{t.calYear}</label>
                         <input
                           id="year"
-                          placeholder="2025/2026"
+                          placeholder="2026/2027"
                           value={selected.academicYear}
                           onChange={(e) =>
                             updateSelected({ academicYear: e.target.value })
