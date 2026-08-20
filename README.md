@@ -11,14 +11,19 @@ npm run dev
 
 Open http://127.0.0.1:5173
 
-## Publish for testers
+## Deploy on Linux (UM / Docker)
 
-See **[PUBLISH.md](./PUBLISH.md)** (step-by-step in Bahasa Melayu: GitHub + SourceTree + Vercel).
+See **[DEPLOY-LINUX.md](./DEPLOY-LINUX.md)** for Docker Compose (web + API + PostgreSQL).
 
 ```bash
-npm run build
-npm run preview
+cp .env.example .env
+docker compose build
+docker compose up -d
 ```
+
+## Publish for testers (Vercel demo)
+
+See **[PUBLISH.md](./PUBLISH.md)** — static hosting without shared database.
 
 ## What’s included
 
@@ -26,3 +31,4 @@ npm run preview
 - Period & time rules, scheduling constraints (UG / PG / …)
 - Manual compose + auto-generate from student package
 - EN / BM language toggle
+- Optional Docker stack: JWT login + shared Postgres documents

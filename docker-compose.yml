@@ -1,0 +1,44 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: allocashun
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+      POSTGRES_DB: allocashun
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U allocashun -d allocashun"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    # Do not publish 5432 to the host by default (security).
+
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://allocashun:${DB_PASSWORD:-changeme}@db:5432/allocashun
+      JWT_SECRET: ${JWT_SECRET:-change-this-jwt-secret-in-production}
+      PORT: "3000"
+      NODE_ENV: production
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "${HOST_PORT:-80}:80"
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
